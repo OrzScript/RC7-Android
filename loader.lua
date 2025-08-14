@@ -17,8 +17,8 @@ if game.CoreGui:FindFirstChild("RC7LOLOL") then
     Explorer.Visible = false
     Open.Visible = false
     Save.Visible = false
-    RC7.Active = true
     RC7.Draggable = true
+    RC7.Active = true
     Open.Draggable = true
     Open.Active = true    
     for i,v in next, listfiles("RC7Scripts") do
