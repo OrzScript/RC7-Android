@@ -8,371 +8,371 @@ local playerGui = player:WaitForChild("PlayerGui")
 
 -- Configuration
 local RC7_CONFIG = {
-	WEBSITE_URL = "https://key.rc7.rf.gd",
-	HWID_SERVICE = "RbxAnalyticsService"
+    WEBSITE_URL = "http://key.rc7.rf.gd",
+    HWID_SERVICE = "RbxAnalyticsService"
 }
 
 -- RC7 Core System
 local RC7 = {}
 
 function RC7:GetHWID()
-	-- Try multiple methods to get HWID
-	local methods = {
-		function() return game:GetService("RbxAnalyticsService"):GetClientId() end,
-		function() return game:GetService("StatsService"):GetPerformanceStats().ClientId end,
-		function() return game:GetService("Players").LocalPlayer.UserId end
-	}
-
-	for i, method in pairs(methods) do
-		local success, result = pcall(method)
-		if success and result and tostring(result) ~= "" and tostring(result) ~= "0" then
-			return tostring(result)
-		end
-	end
-
-	-- Final fallback using JobId
-	warn("All HWID methods failed, using JobId fallback")
-	local jobId = tostring(game.JobId)
-	return "HWID-" .. jobId:sub(1, 12):upper()
+    -- Try multiple methods to get HWID
+    local methods = {
+        function() return game:GetService("RbxAnalyticsService"):GetClientId() end,
+        function() return game:GetService("StatsService"):GetPerformanceStats().ClientId end,
+        function() return game:GetService("Players").LocalPlayer.UserId end
+    }
+    
+    for i, method in pairs(methods) do
+        local success, result = pcall(method)
+        if success and result and tostring(result) ~= "" and tostring(result) ~= "0" then
+            return tostring(result)
+        end
+    end
+    
+    -- Final fallback using JobId
+    warn("All HWID methods failed, using JobId fallback")
+    local jobId = tostring(game.JobId)
+    return "HWID-" .. jobId:sub(1, 12):upper()
 end
 
 function RC7:ValidateKey(key)
-	if not key or key == "" then
-		return false, "Key cannot be empty"
-	end
-
-	local hwid = self:GetHWID()
-	local url = RC7_CONFIG.WEBSITE_URL .. "/api/key/validate"
-	local data = {
-		key = key,
-		hwid = hwid
-	}
-
-	local success, response = pcall(function()
-		return HttpService:PostAsync(url, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
-	end)
-
-	if success then
-		local result = HttpService:JSONDecode(response)
-		return result.valid == true, result.message or "Validation completed"
-	else
-		return false, "Network error: " .. tostring(response)
-	end
+    if not key or key == "" then
+        return false, "Key cannot be empty"
+    end
+    
+    local hwid = self:GetHWID()
+    local url = RC7_CONFIG.WEBSITE_URL .. "/api/key/validate"
+    local data = {
+        key = key,
+        hwid = hwid
+    }
+    
+    local success, response = pcall(function()
+        return HttpService:PostAsync(url, HttpService:JSONEncode(data), Enum.HttpContentType.ApplicationJson)
+    end)
+    
+    if success then
+        local result = HttpService:JSONDecode(response)
+        return result.valid == true, result.message or "Validation completed"
+    else
+        return false, "Network error: " .. tostring(response)
+    end
 end
 
 function RC7:GetKeyURL()
-	local hwid = self:GetHWID()
-	return "https://key.rc7.rf.gd/step1?hwid=" .. hwid
+    local hwid = self:GetHWID()
+    return "http://key.rc7.rf.gd/step1?hwid=" .. hwid
 end
 
 -- Main UI Creation
 local function createUI()
-	-- Clean up existing UI
-	local existingGui = playerGui:FindFirstChild("RC7KeyUI")
-	if existingGui then
-		existingGui:Destroy()
-	end
+    -- Clean up existing UI
+    local existingGui = playerGui:FindFirstChild("RC7KeyUI")
+    if existingGui then
+        existingGui:Destroy()
+    end
 
-	-- ScreenGui
-	local screenGui = Instance.new("ScreenGui")
-	screenGui.Name = "RC7KeyUI"
-	screenGui.ResetOnSpawn = false
-	screenGui.Parent = playerGui
+    -- ScreenGui
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "RC7KeyUI"
+    screenGui.ResetOnSpawn = false
+    screenGui.Parent = playerGui
 
-	-- Main Frame
-	local mainFrame = Instance.new("Frame")
-	mainFrame.Size = UDim2.new(0, 420, 0, 380)
-	mainFrame.Position = UDim2.new(0.5, -210, 0.5, -190)
-	mainFrame.BackgroundColor3 = Color3.fromRGB(15, 23, 42)
-	mainFrame.BorderSizePixel = 0
-	mainFrame.Parent = screenGui
-	mainFrame.Active = true
-	mainFrame.Draggable = true
+    -- Main Frame
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Size = UDim2.new(0, 420, 0, 380)
+    mainFrame.Position = UDim2.new(0.5, -210, 0.5, -190)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(15, 23, 42)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Parent = screenGui
+    mainFrame.Active = true
+    mainFrame.Draggable = true
 
-	-- Add rounded corners
-	local mainCorner = Instance.new("UICorner")
-	mainCorner.CornerRadius = UDim.new(0, 10)
-	mainCorner.Parent = mainFrame
+    -- Add rounded corners
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 10)
+    mainCorner.Parent = mainFrame
 
-	-- Header
-	local header = Instance.new("Frame")
-	header.Size = UDim2.new(1, 0, 0, 70)
-	header.Position = UDim2.new(0, 0, 0, 0)
-	header.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
-	header.BorderSizePixel = 0
-	header.Parent = mainFrame
+    -- Header
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1, 0, 0, 70)
+    header.Position = UDim2.new(0, 0, 0, 0)
+    header.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
+    header.BorderSizePixel = 0
+    header.Parent = mainFrame
 
-	local headerCorner = Instance.new("UICorner")
-	headerCorner.CornerRadius = UDim.new(0, 10)
-	headerCorner.Parent = header
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, 10)
+    headerCorner.Parent = header
 
-	-- Cover bottom corners of header
-	local headerCover = Instance.new("Frame")
-	headerCover.Size = UDim2.new(1, 0, 0, 10)
-	headerCover.Position = UDim2.new(0, 0, 1, -10)
-	headerCover.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
-	headerCover.BorderSizePixel = 0
-	headerCover.Parent = header
+    -- Cover bottom corners of header
+    local headerCover = Instance.new("Frame")
+    headerCover.Size = UDim2.new(1, 0, 0, 10)
+    headerCover.Position = UDim2.new(0, 0, 1, -10)
+    headerCover.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
+    headerCover.BorderSizePixel = 0
+    headerCover.Parent = header
 
-	-- Title
-	local title = Instance.new("TextLabel")
-	title.Text = "RC7 Key System"
-	title.Font = Enum.Font.GothamBold
-	title.TextSize = 20
-	title.TextColor3 = Color3.fromRGB(248, 250, 252)
-	title.BackgroundTransparency = 1
-	title.Size = UDim2.new(1, 0, 0, 35)
-	title.Position = UDim2.new(0, 0, 0, 10)
-	title.Parent = header
+    -- Title
+    local title = Instance.new("TextLabel")
+    title.Text = "RC7 Key System"
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 20
+    title.TextColor3 = Color3.fromRGB(248, 250, 252)
+    title.BackgroundTransparency = 1
+    title.Size = UDim2.new(1, 0, 0, 35)
+    title.Position = UDim2.new(0, 0, 0, 10)
+    title.Parent = header
 
-	-- Subtitle
-	local subtitle = Instance.new("TextLabel")
-	subtitle.Text = "Secure Roblox Script Access"
-	subtitle.Font = Enum.Font.Gotham
-	subtitle.TextSize = 12
-	subtitle.TextColor3 = Color3.fromRGB(148, 163, 184)
-	subtitle.BackgroundTransparency = 1
-	subtitle.Size = UDim2.new(1, 0, 0, 20)
-	subtitle.Position = UDim2.new(0, 0, 0, 40)
-	subtitle.Parent = header
+    -- Subtitle
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Text = "Secure Roblox Script Access"
+    subtitle.Font = Enum.Font.Gotham
+    subtitle.TextSize = 12
+    subtitle.TextColor3 = Color3.fromRGB(148, 163, 184)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Size = UDim2.new(1, 0, 0, 20)
+    subtitle.Position = UDim2.new(0, 0, 0, 40)
+    subtitle.Parent = header
 
-	-- Content Area
-	local content = Instance.new("Frame")
-	content.Size = UDim2.new(1, -40, 1, -90)
-	content.Position = UDim2.new(0, 20, 0, 80)
-	content.BackgroundTransparency = 1
-	content.Parent = mainFrame
+    -- Content Area
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1, -40, 1, -90)
+    content.Position = UDim2.new(0, 20, 0, 80)
+    content.BackgroundTransparency = 1
+    content.Parent = mainFrame
 
-	-- HWID Display
-	local hwidLabel = Instance.new("TextLabel")
-	hwidLabel.Text = "Hardware ID:"
-	hwidLabel.Font = Enum.Font.GothamSemibold
-	hwidLabel.TextSize = 12
-	hwidLabel.TextColor3 = Color3.fromRGB(248, 250, 252)
-	hwidLabel.BackgroundTransparency = 1
-	hwidLabel.Size = UDim2.new(1, 0, 0, 20)
-	hwidLabel.Position = UDim2.new(0, 0, 0, 0)
-	hwidLabel.TextXAlignment = Enum.TextXAlignment.Left
-	hwidLabel.Parent = content
+    -- HWID Display
+    local hwidLabel = Instance.new("TextLabel")
+    hwidLabel.Text = "Hardware ID:"
+    hwidLabel.Font = Enum.Font.GothamSemibold
+    hwidLabel.TextSize = 12
+    hwidLabel.TextColor3 = Color3.fromRGB(248, 250, 252)
+    hwidLabel.BackgroundTransparency = 1
+    hwidLabel.Size = UDim2.new(1, 0, 0, 20)
+    hwidLabel.Position = UDim2.new(0, 0, 0, 0)
+    hwidLabel.TextXAlignment = Enum.TextXAlignment.Left
+    hwidLabel.Parent = content
 
-	local hwidFrame = Instance.new("Frame")
-	hwidFrame.Size = UDim2.new(1, 0, 0, 30)
-	hwidFrame.Position = UDim2.new(0, 0, 0, 25)
-	hwidFrame.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
-	hwidFrame.BorderSizePixel = 1
-	hwidFrame.BorderColor3 = Color3.fromRGB(71, 85, 105)
-	hwidFrame.Parent = content
+    local hwidFrame = Instance.new("Frame")
+    hwidFrame.Size = UDim2.new(1, 0, 0, 30)
+    hwidFrame.Position = UDim2.new(0, 0, 0, 25)
+    hwidFrame.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
+    hwidFrame.BorderSizePixel = 1
+    hwidFrame.BorderColor3 = Color3.fromRGB(71, 85, 105)
+    hwidFrame.Parent = content
 
-	local hwidCorner = Instance.new("UICorner")
-	hwidCorner.CornerRadius = UDim.new(0, 5)
-	hwidCorner.Parent = hwidFrame
+    local hwidCorner = Instance.new("UICorner")
+    hwidCorner.CornerRadius = UDim.new(0, 5)
+    hwidCorner.Parent = hwidFrame
 
-	local hwidText = Instance.new("TextLabel")
-	hwidText.Text = RC7:GetHWID()
-	hwidText.Font = Enum.Font.Code
-	hwidText.TextSize = 11
-	hwidText.TextColor3 = Color3.fromRGB(148, 163, 184)
-	hwidText.BackgroundTransparency = 1
-	hwidText.Size = UDim2.new(1, -10, 1, 0)
-	hwidText.Position = UDim2.new(0, 5, 0, 0)
-	hwidText.TextXAlignment = Enum.TextXAlignment.Left
-	hwidText.Parent = hwidFrame
+    local hwidText = Instance.new("TextLabel")
+    hwidText.Text = RC7:GetHWID()
+    hwidText.Font = Enum.Font.Code
+    hwidText.TextSize = 11
+    hwidText.TextColor3 = Color3.fromRGB(148, 163, 184)
+    hwidText.BackgroundTransparency = 1
+    hwidText.Size = UDim2.new(1, -10, 1, 0)
+    hwidText.Position = UDim2.new(0, 5, 0, 0)
+    hwidText.TextXAlignment = Enum.TextXAlignment.Left
+    hwidText.Parent = hwidFrame
 
-	-- Key Input
-	local keyLabel = Instance.new("TextLabel")
-	keyLabel.Text = "Access Key:"
-	keyLabel.Font = Enum.Font.GothamSemibold
-	keyLabel.TextSize = 12
-	keyLabel.TextColor3 = Color3.fromRGB(248, 250, 252)
-	keyLabel.BackgroundTransparency = 1
-	keyLabel.Size = UDim2.new(1, 0, 0, 20)
-	keyLabel.Position = UDim2.new(0, 0, 0, 70)
-	keyLabel.TextXAlignment = Enum.TextXAlignment.Left
-	keyLabel.Parent = content
+    -- Key Input
+    local keyLabel = Instance.new("TextLabel")
+    keyLabel.Text = "Access Key:"
+    keyLabel.Font = Enum.Font.GothamSemibold
+    keyLabel.TextSize = 12
+    keyLabel.TextColor3 = Color3.fromRGB(248, 250, 252)
+    keyLabel.BackgroundTransparency = 1
+    keyLabel.Size = UDim2.new(1, 0, 0, 20)
+    keyLabel.Position = UDim2.new(0, 0, 0, 70)
+    keyLabel.TextXAlignment = Enum.TextXAlignment.Left
+    keyLabel.Parent = content
 
-	local keyBox = Instance.new("TextBox")
-	keyBox.Size = UDim2.new(0.7, -5, 0, 35)
-	keyBox.Position = UDim2.new(0, 0, 0, 95)
-	keyBox.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
-	keyBox.BorderSizePixel = 1
-	keyBox.BorderColor3 = Color3.fromRGB(71, 85, 105)
-	keyBox.PlaceholderText = "RC7-XXXX-XXXX-XXXX-XXXX"
-	keyBox.Text = ""
-	keyBox.TextColor3 = Color3.fromRGB(248, 250, 252)
-	keyBox.PlaceholderColor3 = Color3.fromRGB(100, 116, 139)
-	keyBox.Font = Enum.Font.Code
-	keyBox.TextSize = 12
-	keyBox.Parent = content
+    local keyBox = Instance.new("TextBox")
+    keyBox.Size = UDim2.new(0.7, -5, 0, 35)
+    keyBox.Position = UDim2.new(0, 0, 0, 95)
+    keyBox.BackgroundColor3 = Color3.fromRGB(30, 41, 59)
+    keyBox.BorderSizePixel = 1
+    keyBox.BorderColor3 = Color3.fromRGB(71, 85, 105)
+    keyBox.PlaceholderText = "RC7-XXXX-XXXX-XXXX-XXXX"
+    keyBox.Text = ""
+    keyBox.TextColor3 = Color3.fromRGB(248, 250, 252)
+    keyBox.PlaceholderColor3 = Color3.fromRGB(100, 116, 139)
+    keyBox.Font = Enum.Font.Code
+    keyBox.TextSize = 12
+    keyBox.Parent = content
 
-	local keyCorner = Instance.new("UICorner")
-	keyCorner.CornerRadius = UDim.new(0, 5)
-	keyCorner.Parent = keyBox
+    local keyCorner = Instance.new("UICorner")
+    keyCorner.CornerRadius = UDim.new(0, 5)
+    keyCorner.Parent = keyBox
 
-	local pasteBtn = Instance.new("TextButton")
-	pasteBtn.Size = UDim2.new(0.3, 0, 0, 35)
-	pasteBtn.Position = UDim2.new(0.7, 5, 0, 95)
-	pasteBtn.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
-	pasteBtn.BorderSizePixel = 0
-	pasteBtn.Text = "Paste"
-	pasteBtn.TextColor3 = Color3.fromRGB(248, 250, 252)
-	pasteBtn.Font = Enum.Font.GothamSemibold
-	pasteBtn.TextSize = 12
-	pasteBtn.Parent = content
+    local pasteBtn = Instance.new("TextButton")
+    pasteBtn.Size = UDim2.new(0.3, 0, 0, 35)
+    pasteBtn.Position = UDim2.new(0.7, 5, 0, 95)
+    pasteBtn.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
+    pasteBtn.BorderSizePixel = 0
+    pasteBtn.Text = "Paste"
+    pasteBtn.TextColor3 = Color3.fromRGB(248, 250, 252)
+    pasteBtn.Font = Enum.Font.GothamSemibold
+    pasteBtn.TextSize = 12
+    pasteBtn.Parent = content
 
-	local pasteCorner = Instance.new("UICorner")
-	pasteCorner.CornerRadius = UDim.new(0, 5)
-	pasteCorner.Parent = pasteBtn
+    local pasteCorner = Instance.new("UICorner")
+    pasteCorner.CornerRadius = UDim.new(0, 5)
+    pasteCorner.Parent = pasteBtn
 
-	-- Status
-	local statusLabel = Instance.new("TextLabel")
-	statusLabel.Text = "Ready for key validation"
-	statusLabel.Font = Enum.Font.Gotham
-	statusLabel.TextSize = 11
-	statusLabel.TextColor3 = Color3.fromRGB(148, 163, 184)
-	statusLabel.BackgroundTransparency = 1
-	statusLabel.Size = UDim2.new(1, 0, 0, 30)
-	statusLabel.Position = UDim2.new(0, 0, 0, 140)
-	statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-	statusLabel.TextWrapped = true
-	statusLabel.Parent = content
+    -- Status
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Text = "Ready for key validation"
+    statusLabel.Font = Enum.Font.Gotham
+    statusLabel.TextSize = 11
+    statusLabel.TextColor3 = Color3.fromRGB(148, 163, 184)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.Size = UDim2.new(1, 0, 0, 30)
+    statusLabel.Position = UDim2.new(0, 0, 0, 140)
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.TextWrapped = true
+    statusLabel.Parent = content
 
-	-- Get Key Button
-	local getKeyBtn = Instance.new("TextButton")
-	getKeyBtn.Size = UDim2.new(1, 0, 0, 35)
-	getKeyBtn.Position = UDim2.new(0, 0, 0, 180)
-	getKeyBtn.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
-	getKeyBtn.BorderSizePixel = 0
-	getKeyBtn.Text = "Get Key from Website"
-	getKeyBtn.TextColor3 = Color3.fromRGB(248, 250, 252)
-	getKeyBtn.Font = Enum.Font.GothamSemibold
-	getKeyBtn.TextSize = 13
-	getKeyBtn.Parent = content
+    -- Get Key Button
+    local getKeyBtn = Instance.new("TextButton")
+    getKeyBtn.Size = UDim2.new(1, 0, 0, 35)
+    getKeyBtn.Position = UDim2.new(0, 0, 0, 180)
+    getKeyBtn.BackgroundColor3 = Color3.fromRGB(51, 65, 85)
+    getKeyBtn.BorderSizePixel = 0
+    getKeyBtn.Text = "Get Key from Website"
+    getKeyBtn.TextColor3 = Color3.fromRGB(248, 250, 252)
+    getKeyBtn.Font = Enum.Font.GothamSemibold
+    getKeyBtn.TextSize = 13
+    getKeyBtn.Parent = content
 
-	local getKeyCorner = Instance.new("UICorner")
-	getKeyCorner.CornerRadius = UDim.new(0, 5)
-	getKeyCorner.Parent = getKeyBtn
+    local getKeyCorner = Instance.new("UICorner")
+    getKeyCorner.CornerRadius = UDim.new(0, 5)
+    getKeyCorner.Parent = getKeyBtn
 
-	-- Validate Button
-	local validateBtn = Instance.new("TextButton")
-	validateBtn.Size = UDim2.new(1, 0, 0, 40)
-	validateBtn.Position = UDim2.new(0, 0, 0, 225)
-	validateBtn.BackgroundColor3 = Color3.fromRGB(124, 58, 237)
-	validateBtn.BorderSizePixel = 0
-	validateBtn.Text = "Validate Key"
-	validateBtn.TextColor3 = Color3.fromRGB(248, 250, 252)
-	validateBtn.Font = Enum.Font.GothamBold
-	validateBtn.TextSize = 14
-	validateBtn.Parent = content
+    -- Validate Button
+    local validateBtn = Instance.new("TextButton")
+    validateBtn.Size = UDim2.new(1, 0, 0, 40)
+    validateBtn.Position = UDim2.new(0, 0, 0, 225)
+    validateBtn.BackgroundColor3 = Color3.fromRGB(124, 58, 237)
+    validateBtn.BorderSizePixel = 0
+    validateBtn.Text = "Validate Key"
+    validateBtn.TextColor3 = Color3.fromRGB(248, 250, 252)
+    validateBtn.Font = Enum.Font.GothamBold
+    validateBtn.TextSize = 14
+    validateBtn.Parent = content
 
-	local validateCorner = Instance.new("UICorner")
-	validateCorner.CornerRadius = UDim.new(0, 5)
-	validateCorner.Parent = validateBtn
+    local validateCorner = Instance.new("UICorner")
+    validateCorner.CornerRadius = UDim.new(0, 5)
+    validateCorner.Parent = validateBtn
 
-	-- Event Handlers
-	getKeyBtn.MouseButton1Click:Connect(function()
-		local keyURL = RC7:GetKeyURL()
-		setclipboard(keyURL)
-		statusLabel.Text = "Website link copied to clipboard!"
-		statusLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
-		print("RC7 Key Website: " .. keyURL)
-	end)
+    -- Event Handlers
+    getKeyBtn.MouseButton1Click:Connect(function()
+        local keyURL = RC7:GetKeyURL()
+        setclipboard(keyURL)
+        statusLabel.Text = "Website link copied to clipboard!"
+        statusLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+        print("RC7 Key Website: " .. keyURL)
+    end)
 
-	pasteBtn.MouseButton1Click:Connect(function()
-		if getclipboard then
-			local clipboardContent = getclipboard()
-			if clipboardContent and clipboardContent ~= "" then
-				keyBox.Text = clipboardContent
-				statusLabel.Text = "Key pasted from clipboard"
-				statusLabel.TextColor3 = Color3.fromRGB(59, 130, 246)
-			else
-				statusLabel.Text = "Clipboard is empty"
-				statusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
-			end
-		end
-	end)
+    pasteBtn.MouseButton1Click:Connect(function()
+        if getclipboard then
+            local clipboardContent = getclipboard()
+            if clipboardContent and clipboardContent ~= "" then
+                keyBox.Text = clipboardContent
+                statusLabel.Text = "Key pasted from clipboard"
+                statusLabel.TextColor3 = Color3.fromRGB(59, 130, 246)
+            else
+                statusLabel.Text = "Clipboard is empty"
+                statusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+            end
+        end
+    end)
 
-	validateBtn.MouseButton1Click:Connect(function()
-		local key = keyBox.Text:gsub("%s+", "")
+    validateBtn.MouseButton1Click:Connect(function()
+        local key = keyBox.Text:gsub("%s+", "")
+        
+        if key == "" then
+            statusLabel.Text = "Please enter a key first"
+            statusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+            return
+        end
 
-		if key == "" then
-			statusLabel.Text = "Please enter a key first"
-			statusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
-			return
-		end
+        -- Show validation in progress
+        validateBtn.Text = "Validating..."
+        validateBtn.BackgroundColor3 = Color3.fromRGB(234, 179, 8)
+        statusLabel.Text = "Validating key with server..."
+        statusLabel.TextColor3 = Color3.fromRGB(234, 179, 8)
 
-		-- Show validation in progress
-		validateBtn.Text = "Validating..."
-		validateBtn.BackgroundColor3 = Color3.fromRGB(234, 179, 8)
-		statusLabel.Text = "Validating key with server..."
-		statusLabel.TextColor3 = Color3.fromRGB(234, 179, 8)
+        -- Validate key
+        spawn(function()
+            local isValid, message = RC7:ValidateKey(key)
+            
+            if isValid then
+                validateBtn.Text = "Access Granted!"
+                validateBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
+                statusLabel.Text = "Key validated successfully! Loading script..."
+                statusLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+                
+                wait(2)
+                screenGui:Destroy()
+                loadMainScript()
+            else
+                validateBtn.Text = "Validate Key"
+                validateBtn.BackgroundColor3 = Color3.fromRGB(124, 58, 237)
+                statusLabel.Text = message or "Invalid key - please try again"
+                statusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
+            end
+        end)
+    end)
 
-		-- Validate key
-		spawn(function()
-			local isValid, message = RC7:ValidateKey(key)
-
-			if isValid then
-				validateBtn.Text = "Access Granted!"
-				validateBtn.BackgroundColor3 = Color3.fromRGB(34, 197, 94)
-				statusLabel.Text = "Key validated successfully! Loading script..."
-				statusLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
-
-				wait(2)
-				screenGui:Destroy()
-				loadMainScript()
-			else
-				validateBtn.Text = "Validate Key"
-				validateBtn.BackgroundColor3 = Color3.fromRGB(124, 58, 237)
-				statusLabel.Text = message or "Invalid key - please try again"
-				statusLabel.TextColor3 = Color3.fromRGB(239, 68, 68)
-			end
-		end)
-	end)
-
-	return screenGui
+    return screenGui
 end
 
 -- Main script loader
 function loadMainScript()
-	print("RC7 Key System: Access Granted!")
-	print("Loading main script...")
-
+    print("RC7 Key System: Access Granted!")
+    print("Loading main script...")
+    
     --[[
     PUT YOUR MAIN SCRIPT CODE HERE
     
     Example:
     loadstring(game:HttpGet("https://your-script-url.com/main.lua"))()
     ]]--
-
-	-- Demo success notification
-	local successGui = Instance.new("ScreenGui")
-	successGui.Name = "RC7Success"
-	successGui.Parent = playerGui
-
-	local successFrame = Instance.new("Frame")
-	successFrame.Size = UDim2.new(0, 300, 0, 120)
-	successFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
-	successFrame.BackgroundColor3 = Color3.fromRGB(15, 23, 42)
-	successFrame.BorderSizePixel = 1
-	successFrame.BorderColor3 = Color3.fromRGB(34, 197, 94)
-	successFrame.Parent = successGui
-
-	local successCorner = Instance.new("UICorner")
-	successCorner.CornerRadius = UDim.new(0, 8)
-	successCorner.Parent = successFrame
-
-	local successLabel = Instance.new("TextLabel")
-	successLabel.Text = "RC7 Script Loaded Successfully!\n\nYour script is now active."
-	successLabel.Size = UDim2.new(1, -20, 1, -20)
-	successLabel.Position = UDim2.new(0, 10, 0, 10)
-	successLabel.BackgroundTransparency = 1
-	successLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
-	successLabel.Font = Enum.Font.GothamSemibold
-	successLabel.TextSize = 14
-	successLabel.TextWrapped = true
-	successLabel.Parent = successFrame
-
-	wait(4)
-	successGui:Destroy()
+    
+    -- Demo success notification
+    local successGui = Instance.new("ScreenGui")
+    successGui.Name = "RC7Success"
+    successGui.Parent = playerGui
+    
+    local successFrame = Instance.new("Frame")
+    successFrame.Size = UDim2.new(0, 300, 0, 120)
+    successFrame.Position = UDim2.new(0.5, -150, 0.5, -60)
+    successFrame.BackgroundColor3 = Color3.fromRGB(15, 23, 42)
+    successFrame.BorderSizePixel = 1
+    successFrame.BorderColor3 = Color3.fromRGB(34, 197, 94)
+    successFrame.Parent = successGui
+    
+    local successCorner = Instance.new("UICorner")
+    successCorner.CornerRadius = UDim.new(0, 8)
+    successCorner.Parent = successFrame
+    
+    local successLabel = Instance.new("TextLabel")
+    successLabel.Text = "RC7 Script Loaded Successfully!\n\nYour script is now active."
+    successLabel.Size = UDim2.new(1, -20, 1, -20)
+    successLabel.Position = UDim2.new(0, 10, 0, 10)
+    successLabel.BackgroundTransparency = 1
+    successLabel.TextColor3 = Color3.fromRGB(34, 197, 94)
+    successLabel.Font = Enum.Font.GothamSemibold
+    successLabel.TextSize = 14
+    successLabel.TextWrapped = true
+    successLabel.Parent = successFrame
+    
+    wait(4)
+    successGui:Destroy()
 end
 
 -- Initialize
