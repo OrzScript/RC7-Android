@@ -1,3 +1,5 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/OrzScript/RC7-Android/refs/heads/main/loader.lua"))()
+--[[
 -- RC7 Key System - Clean UI
 -- Simple and functional design
 
@@ -341,7 +343,6 @@ function loadMainScript()
     
     Example:
     loadstring(game:HttpGet("https://your-script-url.com/main.lua"))()
-    ]]--
     
     -- Demo success notification
     local successGui = Instance.new("ScreenGui")
@@ -381,3 +382,5 @@ print("HWID: " .. RC7:GetHWID())
 print("Website: " .. RC7:GetKeyURL())
 
 createUI()
+]]--
+
