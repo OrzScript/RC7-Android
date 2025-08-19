@@ -1,10 +1,11 @@
 -- local _autoexecute = clonefunction(client.enableautoexec)
-
+--[[
 setreadonly(client, false)
 client.enableautoexec = nil
 client.execute = nil
 client.securestring = function() end
 setreadonly(client, true)
+]]
 
 if game.CoreGui:FindFirstChild("RC7LOLOL") then
     game.CoreGui:FindFirstChild("RC7LOLOL"):Destroy()
