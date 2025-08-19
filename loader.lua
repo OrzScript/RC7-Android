@@ -1,4 +1,4 @@
-local _autoexecute = clonefunction(client.enableautoexec)
+-- local _autoexecute = clonefunction(client.enableautoexec)
 
 setreadonly(client, false)
 client.enableautoexec = nil
@@ -10,7 +10,7 @@ if game.CoreGui:FindFirstChild("RC7LOLOL") then
     game.CoreGui:FindFirstChild("RC7LOLOL"):Destroy()
 end
 
-_autoexecute()
+-- _autoexecute()
 
 local Screen = game:GetObjects("rbxassetid://14625538289")[1]
 Screen.Parent = gethui()
